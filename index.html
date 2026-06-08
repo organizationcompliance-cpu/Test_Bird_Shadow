@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>靜態鳥 AR 貼紙跳轉</title>
+    
+    <script src="https://aframe.io/releases/1.5.0/aframe.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.5/dist/mindar-image-aframe.prod.js"></script>
+
+    <style>
+        body { margin: 0; overflow: hidden; }
+        #scanning-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.7); color: white;
+            display: flex; align-items: center; justify-content: center;
+            font-family: sans-serif; font-size: 20px; z-index: 9999;
+        }
+        .hidden { display: none !important; }
+    </style>
+</head>
+<body>
+
+    <div id="scanning-overlay">正在初始化 AR 系統...</div>
+
+    <a-scene mindar-image="imageTargetSrc: ./targets.mind; autoStart: true; uiLoading: no; uiScanning: yes;" 
+             embedded color-space="sRGB" renderer="colorManagement: true, sortObjects: true" 
+             vr-mode-ui="enabled: false" device-orientation-permission-ui="enabled: false">
+        
+        <a-assets>
+            <img id="birdStaticImage" src="./bird-wings.png">
+        </a-assets>
+
+        <a-camera position="0 0 0" look-controls="enabled: false"></a-camera>
+
+        <a-entity id="bird-target" mindar-image-target="targetIndex: 0">
+            <a-image src="#birdStaticImage" 
+                     width="1" 
+                     height="1" 
+                     position="0 0 0" 
+                     rotation="0 0 0">
+            </a-image>
+        </a-entity>
+
+    </a-scene>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            const sceneEl = document.querySelector('a-scene');
+            const targetEl = document.querySelector('#bird-target');
+            const overlay = document.querySelector('#scanning-overlay');
+
+            // AR 系統就緒
+            sceneEl.addEventListener("arReady", () => {
+                overlay.classList.add('hidden');
+                console.log("系統就緒，請對準鳥的剪影貼紙。");
+            });
+
+            // 核心邏輯：鏡頭辨識到剪影，AR 靜態圖顯現並重疊的瞬間
+            targetEl.addEventListener("targetFound", () => {
+                console.log("辨識成功！靜態鳥圖已重疊，1秒後自動跳轉...");
+                
+                // 稍微延遲 1 秒，讓使用者看清楚「剪影生出彩色翅膀鳥」的視覺變化
+                setTimeout(() => {
+                    // 換成你想要跳轉的網站網址
+                    window.location.href = "https://www.example.com"; 
+                }, 1000);
+            });
+        });
+    </script>
+</body>
+</html>
